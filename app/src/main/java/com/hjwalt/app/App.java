@@ -4,18 +4,20 @@
 package com.hjwalt.app;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.Timer;
 import com.hjwalt.app.runnables.ExceptionRunnable;
 import com.hjwalt.app.runnables.HeavyWorkRunnable;
 import com.hjwalt.app.runnables.ObjectNotifyAllRunnable;
 import com.hjwalt.app.runnables.ObjectNotifyRunnable;
 import com.hjwalt.app.runnables.ObjectWaitRunnable;
 import com.hjwalt.app.runnables.ThreadLocalRunnable;
+import com.hjwalt.app.runnables.TimerRunnable;
 import com.hjwalt.app.runnables.ZombieRunnable;
 import com.hjwalt.app.threads.MyThread;
 
 public class App {
     public static void main(String[] args) {
-        zombie();
+        timer();
     }
 
     static class Handler implements UncaughtExceptionHandler {
@@ -26,6 +28,17 @@ public class App {
             throw new UnsupportedOperationException("Unimplemented method 'uncaughtException'");
         }
 
+    }
+
+    static void timer() {
+        // if timer delay is shorter than execution, task will always run
+        Timer timer = new Timer(true);
+        timer.scheduleAtFixedRate(new TimerRunnable(), 0, 4*1000);
+        try {
+            Thread.sleep(120000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     static void zombie() {
