@@ -5,11 +5,15 @@ package com.hjwalt.app;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Timer;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import com.hjwalt.app.runnables.ExceptionRunnable;
 import com.hjwalt.app.runnables.HeavyWorkRunnable;
 import com.hjwalt.app.runnables.ObjectNotifyAllRunnable;
 import com.hjwalt.app.runnables.ObjectNotifyRunnable;
 import com.hjwalt.app.runnables.ObjectWaitRunnable;
+import com.hjwalt.app.runnables.QueueConsumerRunnable;
+import com.hjwalt.app.runnables.QueueProducerRunnable;
 import com.hjwalt.app.runnables.ThreadLocalRunnable;
 import com.hjwalt.app.runnables.TimerRunnable;
 import com.hjwalt.app.runnables.ZombieRunnable;
@@ -17,7 +21,7 @@ import com.hjwalt.app.threads.MyThread;
 
 public class App {
     public static void main(String[] args) {
-        timer();
+        blockingQueue();
     }
 
     static class Handler implements UncaughtExceptionHandler {
@@ -28,6 +32,18 @@ public class App {
             throw new UnsupportedOperationException("Unimplemented method 'uncaughtException'");
         }
 
+    }
+
+    static void blockingQueue() {
+        // fair means actual FIFO based on wait sequence, but will be slower
+        BlockingQueue<String> queue  = new ArrayBlockingQueue<>(2, true);
+        Thread consumer1 = new Thread(new QueueConsumerRunnable(queue, "consumer1", 10), "consumer");
+        Thread consumer2 = new Thread(new QueueConsumerRunnable(queue, "consumer2", 20), "consumer2");
+        Thread producer = new Thread(new QueueProducerRunnable(queue), "producer");
+
+        consumer1.start();
+        consumer2.start();
+        producer.start();
     }
 
     static void timer() {
