@@ -4,14 +4,20 @@
 package com.hjwalt.app;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import com.hjwalt.app.callables.StringCallable;
 import com.hjwalt.app.exceptions.RejectedException;
 import com.hjwalt.app.handlers.RejectedHandler;
 import com.hjwalt.app.runnables.ExceptionRunnable;
@@ -30,17 +36,46 @@ import com.hjwalt.app.threads.MyThread;
 
 public class App {
   public static void main(String[] args) {
-    rejectionHandler();
+    futureTask();
   }
 
-  static class Handler implements UncaughtExceptionHandler {
+  static void futureTask() {
+    ExecutorService executor = Executors.newFixedThreadPool(1);
 
-    @Override
-    public void uncaughtException(Thread t, Throwable e) {
-      // TODO Auto-generated method stub
-      throw new UnsupportedOperationException("Unimplemented method 'uncaughtException'");
+    FutureTask<String> task1 = new FutureTask<>(new StringCallable("1"));
+    FutureTask<String> task2 = new FutureTask<>(new StringCallable("2"));
+
+    executor.execute(task1);
+    executor.execute(task2);
+
+    try {
+      System.out.println(task2.get());
+      System.out.println(task1.get());
+    } catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
     }
 
+    executor.shutdown();
+  }
+
+  static void callable() {
+    ExecutorService executor = Executors.newFixedThreadPool(2);
+
+    List<Future<String>> futures = new ArrayList<>();
+    for (int i = 0; i < 10; i++) {
+      Future<String> future = executor.submit(new StringCallable("thread " + i));
+      futures.add(future);
+    }
+
+    for (Future<String> future : futures) {
+      try {
+        System.out.println("Result: " + future.get());
+      } catch (InterruptedException | ExecutionException e) {
+        e.printStackTrace();
+      }
+    }
+
+    executor.shutdown();
   }
 
   static void rejectionHandler() {
@@ -48,14 +83,15 @@ public class App {
 
     ThreadFactory threadFactory = Executors.defaultThreadFactory();
 
-    ThreadPoolExecutor service =  new ThreadPoolExecutor(2, 4, 1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(4), threadFactory, rejectionHandler);
+    ThreadPoolExecutor service = new ThreadPoolExecutor(2, 4, 1000, TimeUnit.MILLISECONDS,
+        new ArrayBlockingQueue<Runnable>(4), threadFactory, rejectionHandler);
 
-    MonitorRunnable monitor  = new MonitorRunnable(service);
+    MonitorRunnable monitor = new MonitorRunnable(service);
     Thread monitorThread = new Thread(monitor, "monitor");
     monitorThread.start();
 
     for (int i = 0; i < 10; i++) {
-      try{
+      try {
         service.execute(new NamedRunnable("thread" + i));
       } catch (RejectedException e) {
         e.printStackTrace();
