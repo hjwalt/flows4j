@@ -7,8 +7,17 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Timer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import com.hjwalt.app.exceptions.RejectedException;
+import com.hjwalt.app.handlers.RejectedHandler;
 import com.hjwalt.app.runnables.ExceptionRunnable;
 import com.hjwalt.app.runnables.HeavyWorkRunnable;
+import com.hjwalt.app.runnables.MonitorRunnable;
+import com.hjwalt.app.runnables.NamedRunnable;
 import com.hjwalt.app.runnables.ObjectNotifyAllRunnable;
 import com.hjwalt.app.runnables.ObjectNotifyRunnable;
 import com.hjwalt.app.runnables.ObjectWaitRunnable;
@@ -20,114 +29,154 @@ import com.hjwalt.app.runnables.ZombieRunnable;
 import com.hjwalt.app.threads.MyThread;
 
 public class App {
-    public static void main(String[] args) {
-        blockingQueue();
+  public static void main(String[] args) {
+    rejectionHandler();
+  }
+
+  static class Handler implements UncaughtExceptionHandler {
+
+    @Override
+    public void uncaughtException(Thread t, Throwable e) {
+      // TODO Auto-generated method stub
+      throw new UnsupportedOperationException("Unimplemented method 'uncaughtException'");
     }
 
-    static class Handler implements UncaughtExceptionHandler {
+  }
 
-        @Override
-        public void uncaughtException(Thread t, Throwable e) {
-            // TODO Auto-generated method stub
-            throw new UnsupportedOperationException("Unimplemented method 'uncaughtException'");
-        }
+  static void rejectionHandler() {
+    RejectedHandler rejectionHandler = new RejectedHandler();
+
+    ThreadFactory threadFactory = Executors.defaultThreadFactory();
+
+    ThreadPoolExecutor service =  new ThreadPoolExecutor(2, 4, 1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(4), threadFactory, rejectionHandler);
+
+    MonitorRunnable monitor  = new MonitorRunnable(service);
+    Thread monitorThread = new Thread(monitor, "monitor");
+    monitorThread.start();
+
+    for (int i = 0; i < 10; i++) {
+      try{
+        service.execute(new NamedRunnable("thread" + i));
+      } catch (RejectedException e) {
+        e.printStackTrace();
+      }
+    }
+    service.shutdown();
+    System.out.println("shutdown");
+    while (!service.isTerminated()) {
+    }
+    System.out.println("all threads terminated");
+    monitor.shutdown();
+  }
+
+  static void executorService() {
+    ExecutorService service = Executors.newFixedThreadPool(2);
+
+    for (int i = 0; i < 10; i++) {
+      service.execute(new NamedRunnable("thread" + i));
+    }
+    service.shutdown();
+    System.out.println("shutdown");
+    while (!service.isTerminated()) {
 
     }
+    System.out.println("all threads terminated");
+  }
 
-    static void blockingQueue() {
-        // fair means actual FIFO based on wait sequence, but will be slower
-        BlockingQueue<String> queue  = new ArrayBlockingQueue<>(2, true);
-        Thread consumer1 = new Thread(new QueueConsumerRunnable(queue, "consumer1", 10), "consumer");
-        Thread consumer2 = new Thread(new QueueConsumerRunnable(queue, "consumer2", 20), "consumer2");
-        Thread producer = new Thread(new QueueProducerRunnable(queue), "producer");
+  static void blockingQueue() {
+    // fair means actual FIFO based on wait sequence, but will be slower
+    BlockingQueue<String> queue = new ArrayBlockingQueue<>(2, true);
+    Thread consumer1 = new Thread(new QueueConsumerRunnable(queue, "consumer1", 10), "consumer");
+    Thread consumer2 = new Thread(new QueueConsumerRunnable(queue, "consumer2", 20), "consumer2");
+    Thread producer = new Thread(new QueueProducerRunnable(queue), "producer");
 
-        consumer1.start();
-        consumer2.start();
-        producer.start();
+    consumer1.start();
+    consumer2.start();
+    producer.start();
+  }
+
+  static void timer() {
+    // if timer delay is shorter than execution, task will always run
+    Timer timer = new Timer(true);
+    timer.scheduleAtFixedRate(new TimerRunnable(), 0, 4 * 1000);
+    try {
+      Thread.sleep(120000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
     }
+  }
 
-    static void timer() {
-        // if timer delay is shorter than execution, task will always run
-        Timer timer = new Timer(true);
-        timer.scheduleAtFixedRate(new TimerRunnable(), 0, 4*1000);
-        try {
-            Thread.sleep(120000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+  static void zombie() {
+    Thread zombie = new Thread(new ZombieRunnable(), "zombie");
+    zombie.start();
+  }
+
+  static void threadLocal() {
+    for (int i = 0; i < 10; i++) {
+      Thread local = new Thread(new ThreadLocalRunnable("local" + i), "local" + i);
+      local.start();
     }
+  }
 
-    static void zombie() {
-        Thread zombie = new Thread(new ZombieRunnable(), "zombie");
-        zombie.start();
-    }
+  static void exception() {
+    Object toLock = new Object();
+    Thread wait1 = new Thread(new ObjectWaitRunnable(toLock, "wait1"), "wait1");
+    Thread wait2 = new Thread(new ObjectWaitRunnable(toLock, "wait2"), "wait2");
+    Thread notify1 = new Thread(new ObjectNotifyAllRunnable(toLock, "notify1"), "notify1");
+    Thread exception = new Thread(new ExceptionRunnable(), "exception");
 
-    static void threadLocal() {
-        for (int i = 0; i < 10; i++) {
-            Thread local = new Thread(new ThreadLocalRunnable("local"+i),"local"+i);
-            local.start();
-        }
-    }
+    wait1.start();
+    wait2.start();
+    notify1.start();
+    exception.start();
 
-    static void exception() {
-        Object toLock = new Object();
-        Thread wait1 = new Thread(new ObjectWaitRunnable(toLock, "wait1"), "wait1");
-        Thread wait2 = new Thread(new ObjectWaitRunnable(toLock, "wait2"), "wait2");
-        Thread notify1 = new Thread(new ObjectNotifyAllRunnable(toLock, "notify1"), "notify1");
-        Thread exception = new Thread(new ExceptionRunnable(), "exception");
+    exception.setUncaughtExceptionHandler(null);
+  }
 
-        wait1.start();
-        wait2.start();
-        notify1.start();
-        exception.start();
+  static void signalNotifyAll() {
+    Object toLock = new Object();
+    Thread wait1 = new Thread(new ObjectWaitRunnable(toLock, "wait1"), "wait1");
+    Thread wait2 = new Thread(new ObjectWaitRunnable(toLock, "wait2"), "wait2");
+    Thread notify1 = new Thread(new ObjectNotifyAllRunnable(toLock, "notify1"), "notify1");
 
-        exception.setUncaughtExceptionHandler(null);
-    }
+    wait1.start();
+    wait2.start();
+    notify1.start();
+  }
 
-    static void signalNotifyAll() {
-        Object toLock = new Object();
-        Thread wait1 = new Thread(new ObjectWaitRunnable(toLock, "wait1"), "wait1");
-        Thread wait2 = new Thread(new ObjectWaitRunnable(toLock, "wait2"), "wait2");
-        Thread notify1 = new Thread(new ObjectNotifyAllRunnable(toLock, "notify1"), "notify1");
+  static void signalNotify() {
+    Object toLock = new Object();
+    Thread wait1 = new Thread(new ObjectWaitRunnable(toLock, "wait1"), "wait1");
+    Thread wait2 = new Thread(new ObjectWaitRunnable(toLock, "wait2"), "wait2");
+    Thread notify1 = new Thread(new ObjectNotifyRunnable(toLock, "notify1"), "notify1");
+    Thread notify2 = new Thread(new ObjectNotifyRunnable(toLock, "notify2"), "notify2");
 
-        wait1.start();
-        wait2.start();
-        notify1.start();
-    }
+    wait1.start();
+    wait2.start();
+    notify1.start();
+    notify2.start();
+  }
 
-    static void signalNotify() {
-        Object toLock = new Object();
-        Thread wait1 = new Thread(new ObjectWaitRunnable(toLock, "wait1"), "wait1");
-        Thread wait2 = new Thread(new ObjectWaitRunnable(toLock, "wait2"), "wait2");
-        Thread notify1 = new Thread(new ObjectNotifyRunnable(toLock, "notify1"), "notify1");
-        Thread notify2 = new Thread(new ObjectNotifyRunnable(toLock, "notify2"), "notify2");
+  static void basic() {
 
-        wait1.start();
-        wait2.start();
-        notify1.start();
-        notify2.start();
-    }
+    Thread t1 = new Thread(new HeavyWorkRunnable(), "t1");
+    Thread t2 = new Thread(new HeavyWorkRunnable(), "t2");
 
-    static void basic() {
+    System.out.println("starting runnable");
 
-        Thread t1 = new Thread(new HeavyWorkRunnable(), "t1");
-        Thread t2 = new Thread(new HeavyWorkRunnable(), "t2");
+    t1.start();
+    t2.start();
 
-        System.out.println("starting runnable");
-        
-        t1.start();
-        t2.start();
+    System.out.println("runnable started");
 
-        System.out.println("runnable started");
+    Thread t3 = new MyThread("t3");
+    Thread t4 = new MyThread("t4");
 
-        Thread t3 = new MyThread("t3");
-        Thread t4 = new MyThread("t4");
+    System.out.println("starting my threads");
 
-        System.out.println("starting my threads");
+    t3.start();
+    t4.start();
 
-        t3.start();
-        t4.start();
-
-        System.out.println("my threads started");
-    }
+    System.out.println("my threads started");
+  }
 }
