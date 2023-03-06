@@ -21,6 +21,7 @@ import com.hjwalt.app.callables.StringCallable;
 import com.hjwalt.app.exceptions.RejectedException;
 import com.hjwalt.app.handlers.RejectedHandler;
 import com.hjwalt.app.runnables.ExceptionRunnable;
+import com.hjwalt.app.runnables.FutureTaskRunnable;
 import com.hjwalt.app.runnables.HeavyWorkRunnable;
 import com.hjwalt.app.runnables.MonitorRunnable;
 import com.hjwalt.app.runnables.NamedRunnable;
@@ -40,12 +41,13 @@ public class App {
   }
 
   static void futureTask() {
-    ExecutorService executor = Executors.newFixedThreadPool(1);
+    ExecutorService executor = Executors.newFixedThreadPool(10);
 
     FutureTask<String> task1 = new FutureTask<>(new StringCallable("1"));
     FutureTask<String> task2 = new FutureTask<>(new StringCallable("2"));
 
-    executor.execute(task1);
+    executor.execute(new FutureTaskRunnable<>(task1));
+    executor.execute(new FutureTaskRunnable<>(task1));
     executor.execute(task2);
 
     try {
