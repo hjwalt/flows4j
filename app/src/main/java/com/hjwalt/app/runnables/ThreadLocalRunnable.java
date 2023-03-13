@@ -2,12 +2,13 @@ package com.hjwalt.app.runnables;
 
 public class ThreadLocalRunnable implements Runnable {
 
-  static final ThreadLocal<Integer> count = new ThreadLocal<Integer>(){
-    @Override
-    protected Integer initialValue() {
-      return 0;
-    }
-  };
+  static final ThreadLocal<Integer> count =
+      new ThreadLocal<Integer>() {
+        @Override
+        protected Integer initialValue() {
+          return 0;
+        }
+      };
 
   String name;
 
@@ -17,10 +18,9 @@ public class ThreadLocalRunnable implements Runnable {
 
   @Override
   public void run() {
-    for(int i=0 ; i<10; i++){
+    for (int i = 0; i < 10; i++) {
       System.out.println("Thread " + name + ": count" + count.get());
-      count.set(count.get() + 1);  
+      count.set(count.get() + 1);
     }
   }
-  
 }

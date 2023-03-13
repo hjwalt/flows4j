@@ -1,6 +1,6 @@
 package com.hjwalt.app.runnables;
 
-public class ExceptionRunnable implements Runnable{
+public class ExceptionRunnable implements Runnable {
 
   @Override
   public void run() {
@@ -11,5 +11,4 @@ public class ExceptionRunnable implements Runnable{
     }
     throw new RuntimeException("test exception");
   }
-  
 }

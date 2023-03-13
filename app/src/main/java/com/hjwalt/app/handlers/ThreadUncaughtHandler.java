@@ -9,5 +9,4 @@ public class ThreadUncaughtHandler implements UncaughtExceptionHandler {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'uncaughtException'");
   }
-
 }

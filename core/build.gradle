@@ -5,3 +5,7 @@
 plugins {
 	id 'com.hjwalt.java-library-conventions'
 }
+
+dependencies {
+	// api project(':list')
+}

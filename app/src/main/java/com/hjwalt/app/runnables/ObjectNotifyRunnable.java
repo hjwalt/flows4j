@@ -1,7 +1,7 @@
 package com.hjwalt.app.runnables;
 
 public class ObjectNotifyRunnable implements Runnable {
-  
+
   Object locked;
   String name;
 
@@ -15,7 +15,7 @@ public class ObjectNotifyRunnable implements Runnable {
     try {
       Thread.sleep(2000);
       System.out.println("Thread " + name + ": starting");
-      synchronized(locked) {
+      synchronized (locked) {
         System.out.println("Thread " + name + ": sleeping");
         Thread.sleep(6000);
         System.out.println("Thread " + name + ": notifying");
@@ -28,5 +28,4 @@ public class ObjectNotifyRunnable implements Runnable {
       e.printStackTrace();
     }
   }
-
 }

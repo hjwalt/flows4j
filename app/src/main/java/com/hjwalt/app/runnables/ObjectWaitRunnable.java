@@ -1,7 +1,7 @@
 package com.hjwalt.app.runnables;
 
 public class ObjectWaitRunnable implements Runnable {
-  
+
   Object locked;
   String name;
 
@@ -15,7 +15,7 @@ public class ObjectWaitRunnable implements Runnable {
     try {
       Thread.sleep(1000);
       System.out.println("Thread " + name + ": starting");
-      synchronized(locked) {
+      synchronized (locked) {
         System.out.println("Thread " + name + ": waiting");
         locked.wait();
         System.out.println("Thread " + name + ": wait done");
@@ -26,5 +26,4 @@ public class ObjectWaitRunnable implements Runnable {
       e.printStackTrace();
     }
   }
-
 }

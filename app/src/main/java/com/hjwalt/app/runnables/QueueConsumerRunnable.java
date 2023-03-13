@@ -19,14 +19,13 @@ public class QueueConsumerRunnable implements Runnable {
   @Override
   public void run() {
     try {
-      String message;  
+      String message;
       while ((message = queue.take()) != "exit") {
         Thread.sleep(delay);
-        System.out.println("consumer "+name+": " + message);
+        System.out.println("consumer " + name + ": " + message);
       }
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
   }
-  
 }

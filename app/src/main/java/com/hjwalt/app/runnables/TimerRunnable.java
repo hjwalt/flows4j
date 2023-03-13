@@ -16,5 +16,4 @@ public class TimerRunnable extends TimerTask {
     }
     System.out.println("Timer task finished at:" + new Date());
   }
-
 }

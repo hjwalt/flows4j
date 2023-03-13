@@ -13,14 +13,13 @@ public class QueueProducerRunnable implements Runnable {
   @Override
   public void run() {
     for (int i = 0; i < 100; i++) {
-      System.out.println("offering "+i);
+      System.out.println("offering " + i);
       try {
-        this.queue.put("offering "+i);
+        this.queue.put("offering " + i);
       } catch (InterruptedException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
     }
   }
-  
 }

@@ -1,6 +1,6 @@
 package com.hjwalt.app.runnables;
 
-public class NamedRunnable implements Runnable{
+public class NamedRunnable implements Runnable {
 
   public NamedRunnable(String name) {
     this.name = name;
@@ -19,7 +19,7 @@ public class NamedRunnable implements Runnable{
       e.printStackTrace();
     }
   }
-  
+
   @Override
   public String toString() {
     // TODO Auto-generated method stub

@@ -20,5 +20,4 @@ public class FutureTaskRunnable<T> implements Runnable {
     }
     System.out.println("ending");
   }
-  
 }

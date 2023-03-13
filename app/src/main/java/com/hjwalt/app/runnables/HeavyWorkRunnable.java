@@ -1,6 +1,6 @@
 package com.hjwalt.app.runnables;
 
-public class HeavyWorkRunnable implements Runnable{
+public class HeavyWorkRunnable implements Runnable {
 
   @Override
   public void run() {
@@ -11,5 +11,4 @@ public class HeavyWorkRunnable implements Runnable{
     }
     System.out.println("heavy work runnable processing completed");
   }
-  
 }

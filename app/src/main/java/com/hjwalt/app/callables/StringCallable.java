@@ -12,9 +12,9 @@ public class StringCallable implements Callable<String> {
 
   @Override
   public String call() throws Exception {
-    System.out.println("Thread "+this.result+": starting");
+    System.out.println("Thread " + this.result + ": starting");
     Thread.sleep(5000);
-    System.out.println("Thread "+this.result+": completing");
+    System.out.println("Thread " + this.result + ": completing");
     return this.result;
   }
 }

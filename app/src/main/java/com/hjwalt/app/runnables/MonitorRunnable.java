@@ -15,12 +15,17 @@ public class MonitorRunnable implements Runnable {
   @Override
   public void run() {
     while (run) {
-      System.out.println(String.format(
-          "[monitor] [%d/%d] Active: %d, Queued: %d, Completed: %d, Task: %d, isShutdown: %s, isTerminated: %s",
-          this.executor.getPoolSize(), this.executor.getCorePoolSize(),
-          this.executor.getActiveCount(), this.executor.getQueue().size(),
-          this.executor.getCompletedTaskCount(), this.executor.getTaskCount(),
-          this.executor.isShutdown(), this.executor.isTerminated()));
+      System.out.println(
+          String.format(
+              "[monitor] [%d/%d] Active: %d, Queued: %d, Completed: %d, Task: %d, isShutdown: %s, isTerminated: %s",
+              this.executor.getPoolSize(),
+              this.executor.getCorePoolSize(),
+              this.executor.getActiveCount(),
+              this.executor.getQueue().size(),
+              this.executor.getCompletedTaskCount(),
+              this.executor.getTaskCount(),
+              this.executor.isShutdown(),
+              this.executor.isTerminated()));
       try {
         Thread.sleep(1 * 1000);
       } catch (InterruptedException e) {
@@ -32,5 +37,4 @@ public class MonitorRunnable implements Runnable {
   public void shutdown() {
     this.run = false;
   }
-
 }

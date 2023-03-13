@@ -1,11 +1,11 @@
 package com.hjwalt.app.runnables;
 
-public class ZombieRunnable implements Runnable{
+public class ZombieRunnable implements Runnable {
 
   @Override
   public void run() {
     try {
-      while(true) {
+      while (true) {
         Thread.sleep(6000);
       }
     } catch (InterruptedException e) {
@@ -13,5 +13,4 @@ public class ZombieRunnable implements Runnable{
     }
     throw new RuntimeException("test exception");
   }
-  
 }
