@@ -29,5 +29,9 @@ hs_err_pid*
 build
 bin
 
-# VSCode
+# IDE
+.idea
 .vscode
+
+# Mac
+.DS_Store

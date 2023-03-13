@@ -9,4 +9,8 @@
 
 rootProject.name = 'flows4j'
 
-include('app', 'core', 'list', 'utilities')
+include 'app'
+include 'bom'
+include 'core'
+include 'list'
+include 'utilities'

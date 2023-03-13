@@ -1,0 +1,71 @@
+plugins {
+	id 'com.hjwalt.global'
+	id 'java-platform'
+}
+
+// println "Using Spring version " + springVersion + " and Spring Cloud version " + springCloudVersion + " and DGS version " + dgsVersion
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+}
+
+group = 'dev.flows'
+
+dependencies {
+	// api platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:${dgsVersion}")
+	// api platform("org.springframework.boot:spring-boot-dependencies:${springVersion}")
+	// api platform("org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}")
+	api platform('io.cucumber:cucumber-bom:7.8.0')
+	api platform('org.junit:junit-bom:5.9.2')
+
+	constraints {
+		api "commons-io:commons-io:2.11.0"
+		api "org.apache.commons:commons-text:1.9"
+		api "org.apache.commons:commons-lang3:3.12.0"
+
+		api "com.google.guava:guava:31.1-jre"
+		api "com.google.protobuf:protobuf-java-util:3.21.6"
+		api "com.google.protobuf:protobuf-java:3.21.6"
+
+		api "org.slf4j:slf4j-api:2.0.6"
+		api "org.slf4j:slf4j-simple:2.0.6"
+
+		api "org.apache.kafka:kafka-clients:3.4.0"
+
+		api "ch.qos.logback.contrib:logback-jackson:0.1.5"
+		api "ch.qos.logback.contrib:logback-json-classic:0.1.5"
+		api "com.auth0:java-jwt:4.0.0"
+		api "com.google.auth:google-auth-library-oauth2-http:1.11.0"
+		api "com.newrelic.agent.java:newrelic-agent:7.10.0"
+		api "com.newrelic.agent.java:newrelic-api:7.10.0"
+		api "com.squareup.okhttp3:okhttp:4.10.0"
+		api "io.springfox:springfox-swagger-ui:2.10.5"
+		api "io.springfox:springfox-swagger2:2.10.5"
+		api "net.logstash.logback:logstash-logback-encoder:7.2"
+		api "no.finn.unleash:unleash-client-java:4.4.1"
+		api "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5"
+		api "org.graalvm.sdk:graal-sdk:22.2.0"
+		api "org.modelmapper:modelmapper:3.1.0"
+		api "org.rocksdb:rocksdbjni:7.7.3"
+		api "org.springdoc:springdoc-openapi-data-rest:1.6.11"
+		api "org.springdoc:springdoc-openapi-hateoas:1.6.11"
+		api "org.springdoc:springdoc-openapi-native:1.6.11"
+		api "org.springdoc:springdoc-openapi-security:1.6.11"
+		api "org.springdoc:springdoc-openapi-ui:1.6.11"
+		api "org.springdoc:springdoc-openapi-webflux-ui:1.6.11"
+		api "org.springdoc:springdoc-openapi-webmvc-core:1.6.11"
+		api "org.reflections:reflections:0.10.2"
+	}
+}
+
+javaPlatform {
+	allowDependencies()
+}
+
+spotless {
+	groovyGradle {
+		// target '**/*.gradle'
+		greclipse()
+	}
+}
